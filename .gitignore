@@ -1,0 +1,6 @@
+node_modules/
+coverage/
+dist/
+.distribute-tmp/
+*.log
+.DS_Store
