@@ -52,28 +52,38 @@ export function parseArgs( argv, { cwd = process.cwd() } = {} ) {
 				options.help = true;
 				break;
 			case '--mode':
-				options.mode = argv[ ++index ];
+				options.mode = readArgvValue( argv, index, arg );
+				index++;
 				break;
 			case '--version':
-				options.version = argv[ ++index ];
+				options.version = readArgvValue( argv, index, arg );
+				index++;
 				break;
 			case '--output':
-				outputValue = argv[ ++index ];
+				outputValue = readArgvValue( argv, index, arg );
+				index++;
 				break;
 			case '--slug':
-				options.slug = argv[ ++index ];
+				options.slug = readArgvValue( argv, index, arg );
+				index++;
 				break;
 			case '--tmp-dir':
-				tmpDirValue = argv[ ++index ];
+				tmpDirValue = readArgvValue( argv, index, arg );
+				index++;
 				break;
 			case '--sequential':
 				options.sequential = true;
 				break;
 			case '--npm-cmd':
-				options.npmCmd = argv[ ++index ];
+				options.npmCmd = readArgvValue( argv, index, arg );
+				index++;
 				break;
 			case '--cwd':
-				options.cwd = resolvePath( argv[ ++index ], cwd );
+				options.cwd = resolvePath(
+					readArgvValue( argv, index, arg ),
+					cwd
+				);
+				index++;
 				break;
 			default:
 				throw new Error( `Unknown option: ${ arg }` );
@@ -90,6 +100,24 @@ export function parseArgs( argv, { cwd = process.cwd() } = {} ) {
 	options.tmpDir = resolvePath( tmpDirValue, options.cwd );
 
 	return options;
+}
+
+/**
+ * Read the value following a flag from argv.
+ *
+ * @param {string[]} argv  Raw argv slice.
+ * @param {number}   index Current flag index.
+ * @param {string}   flag  Flag name.
+ * @return {string} Flag value.
+ */
+function readArgvValue( argv, index, flag ) {
+	const value = argv[ index + 1 ];
+
+	if ( ! value || value.startsWith( '-' ) ) {
+		throw new Error( `Missing value for ${ flag }.` );
+	}
+
+	return value;
 }
 
 /**
