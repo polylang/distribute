@@ -30,22 +30,6 @@ npx distribute --npm-cmd build:staging
 npx distribute --sequential
 ```
 
-Add a script to the consumer `package.json`:
-
-```json
-{
-  "scripts": {
-    "dist": "distribute"
-  }
-}
-```
-
-Then run:
-
-```bash
-npm run dist
-```
-
 ## Consumer setup
 
 - Add a `.distignore` file at the project root (required).
@@ -61,10 +45,6 @@ When both Composer and NPM steps apply, they run **in parallel** by default. Use
 ```bash
 npx distribute --sequential
 ```
-
-## CI
-
-For GitHub Actions, use the composite action in [`polylang/actions`](https://github.com/polylang/actions) (`distribute`).
 
 ## License
 
