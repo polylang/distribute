@@ -2,23 +2,17 @@ import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 
 /**
- * Detect applicable build steps and validate npm scripts.
+ * Resolve the npm script to run, if any.
  *
  * @param {Object} options
  * @param {string} options.cwd      Consumer project root.
  * @param {string} options.mode     Distribution mode.
  * @param {string} [options.npmCmd]
- * @return {{ composer: boolean, npm: boolean, npmScript: string|null }} Detected build steps.
+ * @return {string|null} NPM script name or null when the step should be skipped.
  */
-export function detectBuildSteps( { cwd, mode, npmCmd } ) {
-	const steps = {
-		composer: existsSync( path.join( cwd, 'composer.json' ) ),
-		npm: false,
-		npmScript: null,
-	};
-
+function resolveNpmScript( { cwd, mode, npmCmd } ) {
 	if ( ! existsSync( path.join( cwd, 'package.json' ) ) ) {
-		return steps;
+		return null;
 	}
 
 	const packageJson = JSON.parse(
@@ -33,10 +27,27 @@ export function detectBuildSteps( { cwd, mode, npmCmd } ) {
 			);
 		}
 
-		return steps;
+		return null;
 	}
 
-	steps.npm = true;
-	steps.npmScript = script;
-	return steps;
+	return script;
+}
+
+/**
+ * Detect applicable build steps and validate npm scripts.
+ *
+ * @param {Object} options
+ * @param {string} options.cwd      Consumer project root.
+ * @param {string} options.mode     Distribution mode.
+ * @param {string} [options.npmCmd]
+ * @return {{ composer: boolean, npm: boolean, npmScript: string|null }} Detected build steps.
+ */
+export function detectBuildSteps( { cwd, mode, npmCmd } ) {
+	const npmScript = resolveNpmScript( { cwd, mode, npmCmd } );
+
+	return {
+		composer: existsSync( path.join( cwd, 'composer.json' ) ),
+		npm: npmScript !== null,
+		npmScript,
+	};
 }
