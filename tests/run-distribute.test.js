@@ -100,16 +100,27 @@ describe( 'runDistribute', () => {
 			} )
 		);
 		writeFileSync(
+			path.join( projectDir, 'package-lock.json' ),
+			JSON.stringify( { name: 'polylang-for-elementor', lockfileVersion: 3 } )
+		);
+		writeFileSync(
 			path.join( projectDir, '.distignore' ),
 			'node_modules/\n'
 		);
 
 		logSpy = jest.spyOn( console, 'log' ).mockImplementation( () => {} );
 		runCommand.mockReset();
-		runCommand.mockResolvedValue( {
-			code: 0,
-			stdout: 'abc1234\n',
-			stderr: '',
+		runCommand.mockImplementation( ( command, args ) => {
+			if ( command === 'zip' ) {
+				mkdirSync( path.dirname( args[ 1 ] ), { recursive: true } );
+				writeFileSync( args[ 1 ], 'zip' );
+			}
+
+			return Promise.resolve( {
+				code: 0,
+				stdout: 'abc1234\n',
+				stderr: '',
+			} );
 		} );
 	} );
 
@@ -138,8 +149,17 @@ describe( 'runDistribute', () => {
 		const calls = [];
 
 		runCommand.mockImplementation( ( command, args, options = {} ) => {
+			if ( command === 'zip' ) {
+				mkdirSync( path.dirname( args[ 1 ] ), { recursive: true } );
+				writeFileSync( args[ 1 ], 'zip' );
+			}
+
 			calls.push( { command, args, prefix: options.prefix } );
-			return Promise.resolve( { code: 0, stdout: '', stderr: '' } );
+			return Promise.resolve( {
+				code: 0,
+				stdout: command === 'git' ? 'abc1234\n' : '',
+				stderr: '',
+			} );
 		} );
 
 		await runDistribute( baseOptions() );
@@ -168,11 +188,20 @@ describe( 'runDistribute', () => {
 		const order = [];
 
 		runCommand.mockImplementation( ( command, args, options = {} ) => {
+			if ( command === 'zip' ) {
+				mkdirSync( path.dirname( args[ 1 ] ), { recursive: true } );
+				writeFileSync( args[ 1 ], 'zip' );
+			}
+
 			if ( options.prefix ) {
 				order.push( `${ options.prefix }:${ command }` );
 			}
 
-			return Promise.resolve( { code: 0, stdout: '', stderr: '' } );
+			return Promise.resolve( {
+				code: 0,
+				stdout: command === 'git' ? 'abc1234\n' : '',
+				stderr: '',
+			} );
 		} );
 
 		await runDistribute( baseOptions( { sequential: true } ) );
@@ -232,6 +261,10 @@ describe( 'runDistribute', () => {
 
 	it( 'packages with slug folder wrapper and custom tmp dir', async () => {
 		const customTmp = path.join( projectDir, 'custom-tmp' );
+		const outputPath = path.join(
+			projectDir,
+			'dist/polylang-for-elementor-abc1234.zip'
+		);
 
 		await runDistribute(
 			baseOptions( {
@@ -244,25 +277,89 @@ describe( 'runDistribute', () => {
 			[
 				'-r',
 				path.join(
-					projectDir,
-					'dist/polylang-for-elementor-abc1234.zip'
+					customTmp,
+					'polylang-for-elementor-abc1234.zip'
 				),
 				'polylang-for-elementor',
 			],
 			expect.objectContaining( { cwd: customTmp } )
 		);
-		expect( existsSync( customTmp ) ).toBe( false );
+		expect( existsSync( customTmp ) ).toBe( true );
+		expect(
+			existsSync( path.join( customTmp, 'polylang-for-elementor' ) )
+		).toBe( false );
+		expect( existsSync( outputPath ) ).toBe( true );
+	} );
+
+	it( 'uses npm install when package-lock.json is missing', async () => {
+		rmSync( path.join( projectDir, 'package-lock.json' ) );
+
+		await runDistribute( baseOptions() );
+
+		expect( runCommand ).toHaveBeenCalledWith(
+			'npm',
+			[ 'install' ],
+			expect.objectContaining( { prefix: 'npm' } )
+		);
+	} );
+
+	it( 'logs skipped npm when package.json has no build script', async () => {
+		writeFileSync(
+			path.join( projectDir, 'package.json' ),
+			JSON.stringify( { name: '@wpsyntex/manual-slug' } )
+		);
+
+		await runDistribute( baseOptions( { slug: 'manual-slug' } ) );
+
+		expect( logSpy ).toHaveBeenCalledWith(
+			'No npm script "build" found; skipping NPM step.'
+		);
+	} );
+
+	it( 'keeps the previous zip when packaging fails', async () => {
+		const outputPath = path.join(
+			projectDir,
+			'dist/polylang-for-elementor-abc1234.zip'
+		);
+		mkdirSync( path.dirname( outputPath ), { recursive: true } );
+		writeFileSync( outputPath, 'previous' );
+
+		runCommand.mockImplementation( ( command ) => {
+			if ( command === 'rsync' ) {
+				return Promise.reject( new Error( 'rsync failed' ) );
+			}
+
+			return Promise.resolve( {
+				code: 0,
+				stdout: command === 'git' ? 'abc1234\n' : '',
+				stderr: '',
+			} );
+		} );
+
+		await expect( runDistribute( baseOptions() ) ).rejects.toThrow(
+			'rsync failed'
+		);
+		expect( existsSync( outputPath ) ).toBe( true );
 	} );
 
 	it( 'aborts sibling build step on failure', async () => {
 		writeFileSync( path.join( projectDir, 'composer.json' ), '{}' );
 
 		runCommand.mockImplementation( ( command, args, options = {} ) => {
+			if ( command === 'zip' ) {
+				mkdirSync( path.dirname( args[ 1 ] ), { recursive: true } );
+				writeFileSync( args[ 1 ], 'zip' );
+			}
+
 			if ( options.prefix === 'composer' && command === 'composer' ) {
 				return Promise.reject( new Error( 'composer failed' ) );
 			}
 
-			return Promise.resolve( { code: 0, stdout: '', stderr: '' } );
+			return Promise.resolve( {
+				code: 0,
+				stdout: command === 'git' ? 'abc1234\n' : '',
+				stderr: '',
+			} );
 		} );
 
 		await expect( runDistribute( baseOptions() ) ).rejects.toThrow(

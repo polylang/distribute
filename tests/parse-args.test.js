@@ -44,9 +44,9 @@ describe( 'parseArgs', () => {
 		expect( options ).toEqual( {
 			mode: 'dev',
 			version: '3.8.0',
-			output: path.join( cwd, 'artifacts' ),
+			output: path.join( cwd, 'other', 'artifacts' ),
 			slug: 'custom-slug',
-			tmpDir: path.join( cwd, '.tmp' ),
+			tmpDir: path.join( cwd, 'other', '.tmp' ),
 			sequential: true,
 			npmCmd: 'build:staging',
 			cwd: path.join( cwd, 'other' ),
@@ -78,6 +78,28 @@ describe( 'parseArgs', () => {
 	it( 'throws for unknown options', () => {
 		expect( () => parseArgs( [ '--unknown' ], { cwd } ) ).toThrow(
 			'Unknown option: --unknown'
+		);
+	} );
+
+	it( 're-anchors relative output and tmp-dir to final --cwd', () => {
+		const options = parseArgs(
+			[ '--output', 'dist', '--cwd', 'other' ],
+			{ cwd }
+		);
+
+		expect( options.cwd ).toBe( path.join( cwd, 'other' ) );
+		expect( options.output ).toBe( path.join( cwd, 'other', 'dist' ) );
+		expect( options.tmpDir ).toBe(
+			path.join( cwd, 'other', '.distribute-tmp' )
+		);
+	} );
+
+	it( 'throws when a value flag is missing its value', () => {
+		expect( () => parseArgs( [ '--mode' ], { cwd } ) ).toThrow(
+			'Missing value for --mode.'
+		);
+		expect( () => parseArgs( [ '--output', '--cwd', 'other' ], { cwd } ) ).toThrow(
+			'Missing value for --output.'
 		);
 	} );
 } );

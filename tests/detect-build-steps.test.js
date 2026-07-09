@@ -69,14 +69,33 @@ describe( 'detectBuildSteps', () => {
 		).toBe( 'build:staging' );
 	} );
 
-	it( 'throws when the resolved npm script is missing', () => {
+	it( 'skips npm when the resolved script is missing', () => {
+		writeFileSync(
+			path.join( tempDir, 'package.json' ),
+			JSON.stringify( { scripts: { build: 'webpack' } } )
+		);
+
+		expect(
+			detectBuildSteps( { cwd: tempDir, mode: 'dev' } )
+		).toEqual( {
+			composer: false,
+			npm: false,
+			npmScript: null,
+		} );
+	} );
+
+	it( 'throws when an explicit --npm-cmd script is missing', () => {
 		writeFileSync(
 			path.join( tempDir, 'package.json' ),
 			JSON.stringify( { scripts: { build: 'webpack' } } )
 		);
 
 		expect( () =>
-			detectBuildSteps( { cwd: tempDir, mode: 'dev' } )
+			detectBuildSteps( {
+				cwd: tempDir,
+				mode: 'dev',
+				npmCmd: 'build:dev',
+			} )
 		).toThrow(
 			'Error: npm script "build:dev" not found in package.json. Pass --npm-cmd <script> to use a different script.'
 		);
