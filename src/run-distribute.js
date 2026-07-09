@@ -4,6 +4,7 @@ import {
 	existsSync,
 	mkdirSync,
 	readdirSync,
+	renameSync,
 	rmSync,
 	unlinkSync,
 } from 'node:fs';
@@ -118,9 +119,8 @@ export async function runDistribute( options ) {
 		steps,
 	} );
 
-	cleanOutputTarget( outputPath, output );
-
 	const stagingDir = path.join( tmpDir, slug );
+	const tempZipPath = path.join( tmpDir, path.basename( outputPath ) );
 
 	try {
 		mkdirSync( stagingDir, { recursive: true } );
@@ -138,7 +138,11 @@ export async function runDistribute( options ) {
 			{ cwd }
 		);
 
-		await runCommand( 'zip', [ '-r', outputPath, slug ], { cwd: tmpDir } );
+		await runCommand( 'zip', [ '-r', tempZipPath, slug ], { cwd: tmpDir } );
+
+		cleanOutputTarget( outputPath, output );
+		mkdirSync( path.dirname( outputPath ), { recursive: true } );
+		renameSync( tempZipPath, outputPath );
 
 		console.log( `Distribution created at: ${ outputPath }` );
 		return outputPath;
