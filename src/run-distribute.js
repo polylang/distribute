@@ -252,7 +252,11 @@ async function runComposer( { cwd, mode, signal } ) {
  * @param {AbortSignal} [options.signal]  Abort signal.
  */
 async function runNpm( { cwd, npmScript, signal } ) {
-	await runCommand( 'npm', [ 'ci' ], { cwd, prefix: 'npm', signal } );
+	const installArgs = existsSync( path.join( cwd, 'package-lock.json' ) )
+		? [ 'ci' ]
+		: [ 'install' ];
+
+	await runCommand( 'npm', installArgs, { cwd, prefix: 'npm', signal } );
 	await runCommand( 'npm', [ 'run', npmScript ], {
 		cwd,
 		prefix: 'npm',
