@@ -128,6 +128,8 @@ export async function runDistribute( options ) {
 	const stagingDir = path.join( tmpDir, slug );
 	const tempZipPath = path.join( tmpDir, path.basename( outputPath ) );
 
+	mkdirSync( tmpDir, { recursive: true } );
+
 	try {
 		mkdirSync( stagingDir, { recursive: true } );
 
@@ -153,7 +155,11 @@ export async function runDistribute( options ) {
 		console.log( `Distribution created at: ${ outputPath }` );
 		return outputPath;
 	} finally {
-		rmSync( tmpDir, { recursive: true, force: true } );
+		rmSync( stagingDir, { recursive: true, force: true } );
+
+		if ( existsSync( tempZipPath ) ) {
+			unlinkSync( tempZipPath );
+		}
 	}
 }
 
