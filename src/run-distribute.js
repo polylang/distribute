@@ -194,22 +194,22 @@ async function runBuildSteps( { cwd, mode, sequential, steps } ) {
 		return;
 	}
 
-	if ( tasks.length === 1 || sequential ) {
-		for ( const task of tasks ) {
-			await task.run();
-		}
-
-		return;
-	}
-
-	const controller = new AbortController();
+	const controller =
+		tasks.length > 1 && ! sequential ? new AbortController() : null;
+	const signal = controller?.signal;
 
 	try {
-		await Promise.all(
-			tasks.map( ( task ) => task.run( controller.signal ) )
-		);
+		if ( tasks.length === 1 || sequential ) {
+			for ( const task of tasks ) {
+				await task.run( signal );
+			}
+
+			return;
+		}
+
+		await Promise.all( tasks.map( ( task ) => task.run( signal ) ) );
 	} catch ( error ) {
-		controller.abort();
+		controller?.abort();
 		throw error;
 	}
 }
