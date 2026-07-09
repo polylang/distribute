@@ -34,14 +34,14 @@ export function parseArgs( argv, { cwd = process.cwd() } = {} ) {
 	const options = {
 		mode: 'production',
 		version: 'commit',
-		output: path.join( cwd, 'dist' ),
 		slug: undefined,
-		tmpDir: path.join( cwd, '.distribute-tmp' ),
 		sequential: false,
 		npmCmd: undefined,
 		cwd,
 		help: false,
 	};
+	let outputValue = 'dist';
+	let tmpDirValue = '.distribute-tmp';
 
 	for ( let index = 0; index < argv.length; index++ ) {
 		const arg = argv[ index ];
@@ -58,13 +58,13 @@ export function parseArgs( argv, { cwd = process.cwd() } = {} ) {
 				options.version = argv[ ++index ];
 				break;
 			case '--output':
-				options.output = resolvePath( argv[ ++index ], cwd );
+				outputValue = argv[ ++index ];
 				break;
 			case '--slug':
 				options.slug = argv[ ++index ];
 				break;
 			case '--tmp-dir':
-				options.tmpDir = resolvePath( argv[ ++index ], cwd );
+				tmpDirValue = argv[ ++index ];
 				break;
 			case '--sequential':
 				options.sequential = true;
@@ -85,6 +85,9 @@ export function parseArgs( argv, { cwd = process.cwd() } = {} ) {
 			`Invalid mode "${ options.mode }". Expected production or dev.`
 		);
 	}
+
+	options.output = resolvePath( outputValue, options.cwd );
+	options.tmpDir = resolvePath( tmpDirValue, options.cwd );
 
 	return options;
 }
