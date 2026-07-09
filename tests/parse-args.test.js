@@ -82,10 +82,9 @@ describe( 'parseArgs', () => {
 	} );
 
 	it( 're-anchors relative output and tmp-dir to final --cwd', () => {
-		const options = parseArgs(
-			[ '--output', 'dist', '--cwd', 'other' ],
-			{ cwd }
-		);
+		const options = parseArgs( [ '--output', 'dist', '--cwd', 'other' ], {
+			cwd,
+		} );
 
 		expect( options.cwd ).toBe( path.join( cwd, 'other' ) );
 		expect( options.output ).toBe( path.join( cwd, 'other', 'dist' ) );
@@ -98,9 +97,9 @@ describe( 'parseArgs', () => {
 		expect( () => parseArgs( [ '--mode' ], { cwd } ) ).toThrow(
 			'Missing value for --mode.'
 		);
-		expect( () => parseArgs( [ '--output', '--cwd', 'other' ], { cwd } ) ).toThrow(
-			'Missing value for --output.'
-		);
+		expect( () =>
+			parseArgs( [ '--output', '--cwd', 'other' ], { cwd } )
+		).toThrow( 'Missing value for --output.' );
 	} );
 } );
 

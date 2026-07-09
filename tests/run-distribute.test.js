@@ -101,7 +101,10 @@ describe( 'runDistribute', () => {
 		);
 		writeFileSync(
 			path.join( projectDir, 'package-lock.json' ),
-			JSON.stringify( { name: 'polylang-for-elementor', lockfileVersion: 3 } )
+			JSON.stringify( {
+				name: 'polylang-for-elementor',
+				lockfileVersion: 3,
+			} )
 		);
 		writeFileSync(
 			path.join( projectDir, '.distignore' ),
@@ -276,10 +279,7 @@ describe( 'runDistribute', () => {
 			'zip',
 			[
 				'-r',
-				path.join(
-					customTmp,
-					'polylang-for-elementor-abc1234.zip'
-				),
+				path.join( customTmp, 'polylang-for-elementor-abc1234.zip' ),
 				'polylang-for-elementor',
 			],
 			expect.objectContaining( { cwd: customTmp } )

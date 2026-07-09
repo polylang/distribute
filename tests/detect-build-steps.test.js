@@ -75,9 +75,7 @@ describe( 'detectBuildSteps', () => {
 			JSON.stringify( { scripts: { build: 'webpack' } } )
 		);
 
-		expect(
-			detectBuildSteps( { cwd: tempDir, mode: 'dev' } )
-		).toEqual( {
+		expect( detectBuildSteps( { cwd: tempDir, mode: 'dev' } ) ).toEqual( {
 			composer: false,
 			npm: false,
 			npmScript: null,
