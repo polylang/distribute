@@ -13,11 +13,11 @@ import path from 'node:path';
 export function detectBuildSteps( { cwd, mode, npmCmd } ) {
 	const steps = {
 		composer: existsSync( path.join( cwd, 'composer.json' ) ),
-		npm: existsSync( path.join( cwd, 'package.json' ) ),
+		npm: false,
 		npmScript: null,
 	};
 
-	if ( ! steps.npm ) {
+	if ( ! existsSync( path.join( cwd, 'package.json' ) ) ) {
 		return steps;
 	}
 
@@ -27,11 +27,16 @@ export function detectBuildSteps( { cwd, mode, npmCmd } ) {
 	const script = npmCmd ?? ( mode === 'dev' ? 'build:dev' : 'build' );
 
 	if ( ! packageJson.scripts?.[ script ] ) {
-		throw new Error(
-			`Error: npm script "${ script }" not found in package.json. Pass --npm-cmd <script> to use a different script.`
-		);
+		if ( npmCmd ) {
+			throw new Error(
+				`Error: npm script "${ script }" not found in package.json. Pass --npm-cmd <script> to use a different script.`
+			);
+		}
+
+		return steps;
 	}
 
+	steps.npm = true;
 	steps.npmScript = script;
 	return steps;
 }

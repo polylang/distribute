@@ -108,6 +108,12 @@ export async function runDistribute( options ) {
 		console.log(
 			`NPM build step detected (script: ${ steps.npmScript }).`
 		);
+	} else if ( existsSync( path.join( cwd, 'package.json' ) ) ) {
+		const script =
+			npmCmd ?? ( mode === 'dev' ? 'build:dev' : 'build' );
+		console.log(
+			`No npm script "${ script }" found; skipping NPM step.`
+		);
 	} else {
 		console.log( 'No package.json found; skipping NPM step.' );
 	}
