@@ -54,6 +54,14 @@ npm run dist
 
 The tool runs against the consumer project root (`process.cwd()` by default). Composer and NPM steps are auto-detected and skipped when the corresponding manifest is missing.
 
+### Parallel vs sequential builds
+
+When both Composer and NPM steps apply, they run **in parallel** by default. Use `--sequential` when the NPM build depends on Composer output (for example, when `vendor/` must exist before `npm run build`).
+
+```bash
+npx distribute --sequential
+```
+
 ## CI
 
 For GitHub Actions, use the composite action in [`polylang/actions`](https://github.com/polylang/actions) (`distribute`).
