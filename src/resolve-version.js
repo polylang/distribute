@@ -13,20 +13,12 @@ export async function resolveVersion( strategy, { cwd } ) {
 		return strategy;
 	}
 
-	if ( strategy === 'commit' ) {
-		const commit = await resolveCommitVersion( cwd );
+	if ( strategy === 'tag' ) {
+		const tag = await resolveTagVersion( cwd );
 
-		if ( commit ) {
-			return commit;
+		if ( tag ) {
+			return tag;
 		}
-
-		return timestampVersion();
-	}
-
-	const tag = await resolveTagVersion( cwd );
-
-	if ( tag ) {
-		return tag;
 	}
 
 	const commit = await resolveCommitVersion( cwd );
