@@ -2,7 +2,7 @@ module.exports = {
 	extends: [ 'plugin:@wordpress/eslint-plugin/recommended' ],
 	overrides: [
 		{
-			files: [ 'tests/**/*.js' ],
+			files: [ 'tests/unit/**/*.js' ],
 			env: {
 				jest: true,
 			},

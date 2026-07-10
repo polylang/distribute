@@ -4,7 +4,8 @@
 	"description": "Build WordPress plugin distribution ZIPs from consumer project roots.",
 	"type": "module",
 	"bin": {
-		"distribute": "./bin/distribute.js"
+		"distribute": "./bin/distribute.js",
+		"verify-dist": "./bin/verify-dist.js"
 	},
 	"exports": {
 		".": "./src/index.js"
@@ -14,8 +15,8 @@
 		"src"
 	],
 	"scripts": {
-		"test": "NODE_OPTIONS=--experimental-vm-modules wp-scripts test-unit-js",
-		"test:unit": "npm run test",
+		"test:unit": "NODE_OPTIONS=--experimental-vm-modules wp-scripts test-unit-js",
+		"test:smoke": "node tests/smoke/verify-polylang-dist.js",
 		"lint": "wp-scripts lint-js"
 	},
 	"keywords": [
@@ -35,6 +36,9 @@
 	},
 	"engines": {
 		"node": ">=18.12.0"
+	},
+	"dependencies": {
+		"minimatch": "^10.2.2"
 	},
 	"publishConfig": {
 		"access": "public"

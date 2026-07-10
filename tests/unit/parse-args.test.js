@@ -1,6 +1,6 @@
 import path from 'node:path';
 
-import { parseArgs, showHelp } from '../src/parse-args.js';
+import { parseArgs, showHelp } from '../../src/parse-args.js';
 
 describe( 'parseArgs', () => {
 	const cwd = '/project';

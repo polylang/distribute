@@ -1,0 +1,13 @@
+{
+	"files": [
+		"LICENSE",
+		"changelog.txt",
+		"css/",
+		"js/",
+		"polylang.php",
+		"readme.txt",
+		"src/",
+		"uninstall.php",
+		"vendor/"
+	]
+}

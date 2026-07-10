@@ -2,7 +2,7 @@ import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
-import { resolveSlug } from '../src/resolve-slug.js';
+import { resolveSlug } from '../../src/resolve-slug.js';
 
 describe( 'resolveSlug', () => {
 	let tempDir;
