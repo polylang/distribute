@@ -76,9 +76,6 @@ async function main() {
 			output: path.join( consumerDir, 'dist' ),
 			tmpDir: path.join( consumerDir, '.distribute-tmp' ),
 			sequential: true,
-			npmCmd: undefined,
-			slug: undefined,
-			help: false,
 		} );
 
 		const zipPath = resolveZipPath( consumerDir );
