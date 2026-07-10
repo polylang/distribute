@@ -1,6 +1,19 @@
 #!/usr/bin/env node
 /* eslint-disable no-console */
 
+/**
+ * Enforce a minimum coverage threshold on changed JavaScript files under `src/`.
+ *
+ * Run `npm run test:coverage` first so Jest writes `coverage/coverage-summary.json`.
+ * This script only reads that summary; it does not execute tests.
+ *
+ * Environment variables:
+ * - `COVERAGE_THRESHOLD` — minimum percentage per metric (default: 90).
+ * - `COVERAGE_SUMMARY_PATH` — path to the JSON summary (default: `coverage/coverage-summary.json`).
+ * - `CHANGED_FILES` — space-separated file list; when set, skips `git diff`.
+ * - `COVERAGE_BASE_REF` — git ref for changed files when `CHANGED_FILES` is unset (default: `origin/master`).
+ */
+
 import { execSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
@@ -12,6 +25,11 @@ const summaryPath = path.resolve(
 );
 
 /**
+ * List changed source files to check.
+ *
+ * When `CHANGED_FILES` is set, filters that list to JavaScript files under `src/`.
+ * Otherwise runs `git diff` against `COVERAGE_BASE_REF` (default `origin/master`).
+ *
  * @return {string[]} Changed source files relative to the repository root.
  */
 function getChangedSrcFiles() {
@@ -43,6 +61,13 @@ function getChangedSrcFiles() {
 	}
 }
 
+/**
+ * Read the coverage summary and fail when changed files are below the threshold.
+ *
+ * Exits with code 1 when any changed file is missing from the summary or any
+ * metric is below `COVERAGE_THRESHOLD`. Requires `npm run test:coverage` to
+ * have been run beforehand.
+ */
 function main() {
 	const changedFiles = getChangedSrcFiles();
 
