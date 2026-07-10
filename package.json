@@ -1,6 +1,6 @@
 {
 	"name": "@wpsyntex/distribute",
-	"version": "1.0.0",
+	"version": "0.1.0",
 	"description": "Build WordPress plugin distribution ZIPs from consumer project roots.",
 	"type": "module",
 	"bin": {
