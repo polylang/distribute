@@ -57,6 +57,14 @@ function resolveZipPath( consumerDir ) {
 		throw new Error( `No ZIP file found in ${ distDir }.` );
 	}
 
+	if ( zips.length > 1 ) {
+		throw new Error(
+			`Expected one ZIP file in ${ distDir }, found ${
+				zips.length
+			}: ${ zips.sort().join( ', ' ) }`
+		);
+	}
+
 	return path.join( distDir, zips[ 0 ] );
 }
 
