@@ -41,7 +41,6 @@
 	},
 	"devDependencies": {
 		"@jest/globals": "^30.2.0",
-		"@wordpress/scripts": "^31.4.0",
-		"typescript": "^5.9.3"
+		"@wordpress/scripts": "^31.4.0"
 	}
 }
