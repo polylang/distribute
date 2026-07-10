@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable no-console */
 
 import { execSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
@@ -17,7 +18,9 @@ function getChangedSrcFiles() {
 	if ( process.env.CHANGED_FILES ) {
 		return process.env.CHANGED_FILES.split( /\s+/ )
 			.map( ( file ) => file.trim() )
-			.filter( ( file ) => file.startsWith( 'src/' ) && file.endsWith( '.js' ) );
+			.filter(
+				( file ) => file.startsWith( 'src/' ) && file.endsWith( '.js' )
+			);
 	}
 
 	const baseRef = process.env.COVERAGE_BASE_REF || 'origin/master';
@@ -32,7 +35,9 @@ function getChangedSrcFiles() {
 
 		return output
 			.split( '\n' )
-			.filter( ( file ) => file.startsWith( 'src/' ) && file.endsWith( '.js' ) );
+			.filter(
+				( file ) => file.startsWith( 'src/' ) && file.endsWith( '.js' )
+			);
 	} catch {
 		return [];
 	}
