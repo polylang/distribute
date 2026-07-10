@@ -1,4 +1,5 @@
 import {
+	chmodSync,
 	existsSync,
 	mkdirSync,
 	mkdtempSync,
@@ -82,6 +83,15 @@ describe( 'cleanOutputTarget', () => {
 
 		cleanOutputTarget( outputPath, outputPath );
 
+		expect( existsSync( outputPath ) ).toBe( false );
+	} );
+
+	it( 'creates parent directories when the target zip does not exist yet', () => {
+		const outputPath = path.join( tempDir, 'nested', 'custom.zip' );
+
+		cleanOutputTarget( outputPath, outputPath );
+
+		expect( existsSync( path.dirname( outputPath ) ) ).toBe( true );
 		expect( existsSync( outputPath ) ).toBe( false );
 	} );
 } );
@@ -316,6 +326,27 @@ describe( 'runDistribute', () => {
 		);
 	} );
 
+	it( 'logs skipped npm for build:dev in dev mode', async () => {
+		writeFileSync(
+			path.join( projectDir, 'package.json' ),
+			JSON.stringify( {
+				name: '@wpsyntex/manual-slug',
+				scripts: { build: 'echo build' },
+			} )
+		);
+
+		await runDistribute(
+			baseOptions( {
+				mode: 'dev',
+				slug: 'manual-slug',
+			} )
+		);
+
+		expect( logSpy ).toHaveBeenCalledWith(
+			'No npm script "build:dev" found; skipping NPM step.'
+		);
+	} );
+
 	it( 'keeps the previous zip when packaging fails', async () => {
 		const outputPath = path.join(
 			projectDir,
@@ -340,6 +371,32 @@ describe( 'runDistribute', () => {
 			'rsync failed'
 		);
 		expect( existsSync( outputPath ) ).toBe( true );
+	} );
+
+	it( 'cleans up the temp zip when packaging fails after zip', async () => {
+		const customTmp = path.join( projectDir, 'custom-tmp' );
+		const outputDir = path.join( projectDir, 'dist' );
+		const tempZipPath = path.join(
+			customTmp,
+			'polylang-for-elementor-abc1234.zip'
+		);
+		mkdirSync( outputDir, { recursive: true } );
+		chmodSync( outputDir, 0o555 );
+
+		try {
+			await expect(
+				runDistribute(
+					baseOptions( {
+						output: outputDir,
+						tmpDir: customTmp,
+					} )
+				)
+			).rejects.toThrow();
+		} finally {
+			chmodSync( outputDir, 0o755 );
+		}
+
+		expect( existsSync( tempZipPath ) ).toBe( false );
 	} );
 
 	it( 'aborts sibling build step on failure', async () => {

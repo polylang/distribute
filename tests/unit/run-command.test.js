@@ -40,6 +40,53 @@ describe( 'runCommand', () => {
 		spawn.mockReset();
 	} );
 
+	it( 'defaults args and options when omitted', async () => {
+		spawn.mockReturnValueOnce( createMockChild( { code: 0 } ) );
+
+		await runCommand( 'true' );
+
+		expect( spawn ).toHaveBeenCalledWith(
+			'true',
+			[],
+			expect.objectContaining( {
+				env: process.env,
+			} )
+		);
+	} );
+
+	it( 'defaults args to an empty array', async () => {
+		spawn.mockReturnValueOnce( createMockChild( { code: 0 } ) );
+
+		await runCommand( 'true', undefined, { silent: true } );
+
+		expect( spawn ).toHaveBeenCalledWith(
+			'true',
+			[],
+			expect.objectContaining( {
+				env: process.env,
+			} )
+		);
+	} );
+
+	it( 'merges custom env with process.env', async () => {
+		spawn.mockReturnValueOnce( createMockChild( { code: 0 } ) );
+
+		await runCommand( 'true', [], {
+			env: { CUSTOM_VAR: 'value' },
+			silent: true,
+		} );
+
+		expect( spawn ).toHaveBeenCalledWith(
+			'true',
+			[],
+			expect.objectContaining( {
+				env: expect.objectContaining( {
+					CUSTOM_VAR: 'value',
+				} ),
+			} )
+		);
+	} );
+
 	it( 'resolves on exit code 0', async () => {
 		spawn.mockReturnValueOnce(
 			createMockChild( { stdout: 'ok\n', code: 0 } )
@@ -52,6 +99,22 @@ describe( 'runCommand', () => {
 			stdout: 'ok\n',
 			stderr: '',
 		} );
+	} );
+
+	it( 'treats a null exit code as failure', async () => {
+		const child = new EventEmitter();
+		child.stdout = new EventEmitter();
+		child.stderr = new EventEmitter();
+		child.kill = jest.fn();
+		spawn.mockReturnValueOnce( child );
+
+		const promise = runCommand( 'false', [], { silent: true } );
+
+		process.nextTick( () => {
+			child.emit( 'close', null );
+		} );
+
+		await expect( promise ).rejects.toThrow( 'exit code 1' );
 	} );
 
 	it( 'rejects on non-zero exit code', async () => {
@@ -79,6 +142,14 @@ describe( 'runCommand', () => {
 			stdout: '',
 			stderr: 'missing',
 		} );
+	} );
+
+	it( 'falls back to the exit code when stderr and stdout are blank', async () => {
+		spawn.mockReturnValueOnce( createMockChild( { code: 2 } ) );
+
+		await expect(
+			runCommand( 'false', [], { silent: true } )
+		).rejects.toThrow( 'exit code 2' );
 	} );
 
 	it( 'prefixes streamed output', async () => {

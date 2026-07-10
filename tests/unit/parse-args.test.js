@@ -5,6 +5,10 @@ import { parseArgs, showHelp } from '../../src/parse-args.js';
 describe( 'parseArgs', () => {
 	const cwd = '/project';
 
+	it( 'defaults cwd to process.cwd()', () => {
+		expect( parseArgs( [] ).cwd ).toBe( process.cwd() );
+	} );
+
 	it( 'returns defaults', () => {
 		expect( parseArgs( [], { cwd } ) ).toEqual( {
 			mode: 'production',
