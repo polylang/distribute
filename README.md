@@ -2,8 +2,9 @@
 
 [![Unit Tests](https://github.com/polylang/distribute/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/polylang/distribute/actions/workflows/unit-tests.yml)
 [![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/polylang/distribute/actions/workflows/unit-tests.yml)
+[![ESLint](https://github.com/polylang/distribute/actions/workflows/eslint.yml/badge.svg)](https://github.com/polylang/distribute/actions/workflows/eslint.yml)
 
-Build WordPress plugin distribution ZIPs from a consumer project root.
+Build WordPress plugin or theme distribution ZIPs from a consumer project root.
 
 ## Requirements
 
