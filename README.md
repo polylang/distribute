@@ -17,17 +17,21 @@ npm install -D @wpsyntex/distribute
 ## Usage
 
 ```bash
-npx distribute
+npx distribute [options]
 ```
 
-Common flags:
+### Options
 
-```bash
-npx distribute --mode dev
-npx distribute --version tag
-npx distribute --output ./artifacts
-npx distribute --npm-cmd build:staging
-npx distribute --sequential
+```
+--mode <production|dev>     Default: production
+--version <strategy|text>   Default: commit (strategies: commit, tag, or a literal version)
+--output <path>             Output directory or ZIP file (default: {cwd}/dist)
+--slug <name>               Override slug (default: from package.json name)
+--tmp-dir <path>            Temp working directory (default: {cwd}/.distribute-tmp)
+--sequential                Run composer then npm (default: parallel when both apply)
+--npm-cmd <script>          Override npm script (default: build or build:dev per mode)
+--cwd <path>                Project root (default: process.cwd())
+-h, --help
 ```
 
 ## Consumer setup
@@ -44,6 +48,27 @@ When both Composer and NPM steps apply, they run **in parallel** by default. Use
 
 ```bash
 npx distribute --sequential
+```
+
+## Development
+
+```bash
+git clone https://github.com/polylang/distribute.git
+cd distribute
+npm install
+```
+
+Run the CLI from the repo:
+
+```bash
+node bin/distribute.js --help
+```
+
+Scripts:
+
+```bash
+npm run test   # unit tests
+npm run lint   # ESLint
 ```
 
 ## License
