@@ -1,5 +1,8 @@
 # @wpsyntex/distribute
 
+[![Unit Tests](https://github.com/polylang/distribute/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/polylang/distribute/actions/workflows/unit-tests.yml)
+[![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/polylang/distribute/actions/workflows/unit-tests.yml)
+
 Build WordPress plugin distribution ZIPs from a consumer project root.
 
 ## Requirements
@@ -112,9 +115,10 @@ node bin/distribute.js --help
 Scripts:
 
 ```bash
-npm run test:unit  # Jest unit tests
-npm run test:smoke # Polylang distribution smoke test
-npm run lint       # ESLint
+npm run test:unit     # Jest unit tests
+npm run test:coverage # Jest unit tests with coverage report
+npm run test:smoke    # Polylang distribution smoke test
+npm run lint          # ESLint
 ```
 
 ## License
