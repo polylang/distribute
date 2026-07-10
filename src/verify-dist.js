@@ -47,8 +47,12 @@ export function walkFiles( rootDir ) {
 	const files = [];
 
 	function walk( currentDir, prefix = '' ) {
-		for ( const entry of readdirSync( currentDir, { withFileTypes: true } ) ) {
-			const relativePath = prefix ? `${ prefix }/${ entry.name }` : entry.name;
+		for ( const entry of readdirSync( currentDir, {
+			withFileTypes: true,
+		} ) ) {
+			const relativePath = prefix
+				? `${ prefix }/${ entry.name }`
+				: entry.name;
 
 			if ( entry.isDirectory() ) {
 				walk( path.join( currentDir, entry.name ), relativePath );
@@ -182,11 +186,15 @@ export async function verifyDist( { zipPath, manifestPath, tmpDir } ) {
 
 	if ( unsatisfied.length > 0 ) {
 		details.push(
-			`Unsatisfied manifest entries (${ unsatisfied.length }):\n${ unsatisfied
+			`Unsatisfied manifest entries (${
+				unsatisfied.length
+			}):\n${ unsatisfied
 				.map( ( pattern ) => `  - ${ pattern }` )
 				.join( '\n' ) }`
 		);
 	}
 
-	throw new Error( `Distribution verification failed.\n\n${ details.join( '\n\n' ) }` );
+	throw new Error(
+		`Distribution verification failed.\n\n${ details.join( '\n\n' ) }`
+	);
 }

@@ -43,7 +43,9 @@ export function fileMatchesPattern( filePath, pattern ) {
  * @return {boolean} Whether the pattern is satisfied.
  */
 export function patternIsSatisfied( pattern, files ) {
-	return files.some( ( filePath ) => fileMatchesPattern( filePath, pattern ) );
+	return files.some( ( filePath ) =>
+		fileMatchesPattern( filePath, pattern )
+	);
 }
 
 /**

@@ -1,6 +1,9 @@
 import path from 'node:path';
 
-import { parseVerifyArgs, showVerifyHelp } from '../../src/parse-verify-args.js';
+import {
+	parseVerifyArgs,
+	showVerifyHelp,
+} from '../../src/parse-verify-args.js';
 
 describe( 'parseVerifyArgs', () => {
 	const cwd = '/project';

@@ -50,6 +50,51 @@ When both Composer and NPM steps apply, they run **in parallel** by default. Use
 npx distribute --sequential
 ```
 
+## Verify distribution
+
+After building a ZIP, verify its contents against a `dist-manifest.json` file at the project root:
+
+```bash
+npx distribute
+npx verify-dist --zip dist/my-plugin-abc1234.zip
+```
+
+### dist-manifest.json
+
+List expected paths relative to the plugin folder inside the ZIP:
+
+```json
+{
+  "files": [
+    "my-plugin.php",
+    "readme.txt",
+    "src/",
+    "js/build/*.js"
+  ]
+}
+```
+
+| Entry | Meaning |
+|-------|---------|
+| `plugin.php` | Exact file (required) |
+| `src/` | Any file under `src/` (at least one required) |
+| `js/build/*.js` | Glob pattern (at least one match required) |
+
+Failures:
+
+- **Unexpected files** — not covered by the manifest (often a `.distignore` leak).
+- **Unsatisfied entries** — required file, directory, or glob missing from the ZIP.
+
+### verify-dist options
+
+```
+--zip <path>        Path to distribution ZIP (required)
+--manifest <path>   Path to dist-manifest.json (default: {cwd}/dist-manifest.json)
+--tmp-dir <path>    Temp working directory (default: {cwd}/tmp)
+--cwd <path>        Consumer project root (default: process.cwd())
+-h, --help
+```
+
 ## Development
 
 ```bash
@@ -67,8 +112,9 @@ node bin/distribute.js --help
 Scripts:
 
 ```bash
-npm run test   # unit tests
-npm run lint   # ESLint
+npm run test:unit  # Jest unit tests
+npm run test:smoke # Polylang distribution smoke test
+npm run lint       # ESLint
 ```
 
 ## License

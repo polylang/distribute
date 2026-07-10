@@ -42,9 +42,9 @@ describe( 'loadManifest', () => {
 			JSON.stringify( { files: [ 'plugin.php', 'src/' ] } )
 		);
 
-		expect( loadManifest( path.join( tempDir, 'dist-manifest.json' ) ) ).toEqual(
-			[ 'plugin.php', 'src/' ]
-		);
+		expect(
+			loadManifest( path.join( tempDir, 'dist-manifest.json' ) )
+		).toEqual( [ 'plugin.php', 'src/' ] );
 	} );
 
 	it( 'fails when manifest is missing', () => {
@@ -70,7 +70,10 @@ describe( 'walkFiles and resolvePluginRoot', () => {
 		writeFileSync( path.join( tempDir, 'plugin.php' ), 'php' );
 		writeFileSync( path.join( tempDir, 'src', 'foo.php' ), 'php' );
 
-		expect( walkFiles( tempDir ) ).toEqual( [ 'plugin.php', 'src/foo.php' ] );
+		expect( walkFiles( tempDir ) ).toEqual( [
+			'plugin.php',
+			'src/foo.php',
+		] );
 	} );
 
 	it( 'requires exactly one top-level directory in a ZIP extract', () => {

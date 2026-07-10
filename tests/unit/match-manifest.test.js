@@ -26,9 +26,9 @@ describe( 'fileMatchesPattern', () => {
 	} );
 
 	it( 'matches directory prefixes', () => {
-		expect(
-			fileMatchesPattern( 'src/class-polylang.php', 'src/' )
-		).toBe( true );
+		expect( fileMatchesPattern( 'src/class-polylang.php', 'src/' ) ).toBe(
+			true
+		);
 		expect( fileMatchesPattern( 'js/build/admin.js', 'src/' ) ).toBe(
 			false
 		);
@@ -38,9 +38,9 @@ describe( 'fileMatchesPattern', () => {
 		expect(
 			fileMatchesPattern( 'js/build/admin.js', 'js/build/*.js' )
 		).toBe( true );
-		expect(
-			fileMatchesPattern( 'js/src/admin.js', 'js/build/*.js' )
-		).toBe( false );
+		expect( fileMatchesPattern( 'js/src/admin.js', 'js/build/*.js' ) ).toBe(
+			false
+		);
 	} );
 } );
 
