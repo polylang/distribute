@@ -6,13 +6,22 @@ on:
   workflow_dispatch:
 
 jobs:
-  static-analysis:
-    uses: ./.github/workflows/static-analysis.yml
+  typos:
+    uses: ./.github/workflows/typos.yml
+
+  eslint:
+    uses: ./.github/workflows/eslint.yml
+
+  unit-tests:
+    uses: ./.github/workflows/unit-tests.yml
+
+  smoke-test:
+    uses: ./.github/workflows/smoke-test.yml
 
   publish:
     name: Publish @wpsyntex/distribute
 
-    needs: static-analysis
+    needs: [typos, eslint, unit-tests, smoke-test]
 
     runs-on: ubuntu-latest
 
