@@ -6,7 +6,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { runDistribute } from '../../src/run-distribute.js';
-import { VERIFY_DIST_TMP_PREFIX, verifyDist } from '../../src/verify-dist.js';
+import { verifyDist } from '../../src/verify-dist.js';
 import { runCommand } from '../../src/run-command.js';
 
 const __dirname = path.dirname( fileURLToPath( import.meta.url ) );
@@ -14,47 +14,14 @@ const MANIFEST_PATH = path.join( __dirname, 'polylang-dist-manifest.json' );
 const POLYLANG_REPO = 'https://github.com/polylang/polylang.git';
 
 /**
- * Remove verify-dist work directories from the consumer tmp folder.
- *
- * @param {string} consumerDir Consumer project root.
- */
-function cleanupVerifyDistTmp( consumerDir ) {
-	const tmpDir = path.join( consumerDir, 'tmp' );
-
-	if ( ! existsSync( tmpDir ) ) {
-		return;
-	}
-
-	for ( const entry of readdirSync( tmpDir ) ) {
-		if ( entry.startsWith( VERIFY_DIST_TMP_PREFIX ) ) {
-			rmSync( path.join( tmpDir, entry ), {
-				recursive: true,
-				force: true,
-			} );
-		}
-	}
-}
-
-/**
- * Remove smoke-test artifacts from a disposable clone.
+ * Remove the disposable polylang clone.
  *
  * @param {string} consumerDir Cloned consumer project root.
  */
-function cleanupSmokeArtifacts( consumerDir ) {
-	if ( ! consumerDir || ! existsSync( consumerDir ) ) {
-		return;
+function cleanupClone( consumerDir ) {
+	if ( consumerDir && existsSync( consumerDir ) ) {
+		rmSync( consumerDir, { recursive: true, force: true } );
 	}
-
-	for ( const dirName of [ 'dist', '.distribute-tmp' ] ) {
-		const artifactDir = path.join( consumerDir, dirName );
-
-		if ( existsSync( artifactDir ) ) {
-			rmSync( artifactDir, { recursive: true, force: true } );
-		}
-	}
-
-	cleanupVerifyDistTmp( consumerDir );
-	rmSync( consumerDir, { recursive: true, force: true } );
 }
 
 /**
@@ -129,7 +96,7 @@ async function main() {
 		console.error( error instanceof Error ? error.message : error );
 		exitCode = 1;
 	} finally {
-		cleanupSmokeArtifacts( consumerDir );
+		cleanupClone( consumerDir );
 	}
 
 	process.exit( exitCode );
