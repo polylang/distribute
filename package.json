@@ -16,6 +16,8 @@
 	],
 	"scripts": {
 		"test:unit": "NODE_OPTIONS=--experimental-vm-modules wp-scripts test-unit-js",
+		"test:coverage": "NODE_OPTIONS=--experimental-vm-modules wp-scripts test-unit-js --coverage",
+		"test:coverage:changed": "node scripts/check-changed-coverage.js",
 		"test:smoke": "node tests/smoke/verify-polylang-dist.js",
 		"lint": "wp-scripts lint-js"
 	},

@@ -16,6 +16,12 @@ jobs:
     steps:
     - name: Check out the source code
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Fetch base branch
+      if: github.event_name == 'pull_request'
+      run: git fetch origin "${{ github.base_ref }}"
 
     - name: Setup Node
       uses: actions/setup-node@v4
@@ -25,5 +31,10 @@ jobs:
     - name: Install dependencies
       run: npm install
 
-    - name: Run Jest Unit Tests
-      run: npm run test:unit
+    - name: Run Jest unit tests with coverage
+      run: npm run test:coverage
+
+    - name: Enforce coverage on changed source files
+      run: npm run test:coverage:changed
+      env:
+        COVERAGE_BASE_REF: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || 'HEAD^' }}
