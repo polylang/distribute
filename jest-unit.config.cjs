@@ -1,6 +1,12 @@
 module.exports = {
 	testEnvironment: 'node',
-	testMatch: [ 'tests/unit/**/*.test.js' ],
+	testMatch: [ '<rootDir>/tests/unit/**/*.test.js' ],
+	testPathIgnorePatterns: [ '/node_modules/' ],
+	transform: {
+		'\\.[jt]sx?$': require.resolve(
+			'@wordpress/scripts/config/babel-transform'
+		),
+	},
 	collectCoverageFrom: [
 		'src/**/*.js',
 		'!**/node_modules/**',

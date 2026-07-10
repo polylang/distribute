@@ -15,8 +15,8 @@
 		"src"
 	],
 	"scripts": {
-		"test:unit": "NODE_OPTIONS=--experimental-vm-modules wp-scripts test-unit-js",
-		"test:coverage": "NODE_OPTIONS=--experimental-vm-modules wp-scripts test-unit-js --coverage",
+		"test:unit": "NODE_OPTIONS=--experimental-vm-modules wp-scripts test-unit-js --config jest-unit.config.cjs",
+		"test:coverage": "NODE_OPTIONS=--experimental-vm-modules wp-scripts test-unit-js --config jest-unit.config.cjs --coverage",
 		"test:smoke": "node tests/smoke/verify-polylang-dist.js",
 		"lint": "wp-scripts lint-js"
 	},
