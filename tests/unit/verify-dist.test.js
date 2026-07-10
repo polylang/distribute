@@ -3,6 +3,7 @@ import {
 	mkdirSync,
 	mkdtempSync,
 	rmSync,
+	symlinkSync,
 	writeFileSync,
 } from 'node:fs';
 import os from 'node:os';
@@ -52,6 +53,28 @@ describe( 'loadManifest', () => {
 			loadManifest( path.join( tempDir, 'dist-manifest.json' ) )
 		).toThrow( /not found/ );
 	} );
+
+	it( 'fails when manifest files is empty', () => {
+		writeFileSync(
+			path.join( tempDir, 'dist-manifest.json' ),
+			JSON.stringify( { files: [] } )
+		);
+
+		expect( () =>
+			loadManifest( path.join( tempDir, 'dist-manifest.json' ) )
+		).toThrow( /Invalid manifest/ );
+	} );
+
+	it( 'fails when manifest files is not an array', () => {
+		writeFileSync(
+			path.join( tempDir, 'dist-manifest.json' ),
+			JSON.stringify( { files: 'plugin.php' } )
+		);
+
+		expect( () =>
+			loadManifest( path.join( tempDir, 'dist-manifest.json' ) )
+		).toThrow( /Invalid manifest/ );
+	} );
 } );
 
 describe( 'walkFiles and resolvePluginRoot', () => {
@@ -76,6 +99,13 @@ describe( 'walkFiles and resolvePluginRoot', () => {
 		] );
 	} );
 
+	it( 'ignores entries that are neither files nor directories', () => {
+		writeFileSync( path.join( tempDir, 'plugin.php' ), 'php' );
+		symlinkSync( 'plugin.php', path.join( tempDir, 'plugin-link' ) );
+
+		expect( walkFiles( tempDir ) ).toEqual( [ 'plugin.php' ] );
+	} );
+
 	it( 'requires exactly one top-level directory in a ZIP extract', () => {
 		const unzipDir = path.join( tempDir, 'unzip' );
 		mkdirSync( path.join( unzipDir, 'plugin' ), { recursive: true } );
@@ -89,6 +119,13 @@ describe( 'walkFiles and resolvePluginRoot', () => {
 		const unzipDir = path.join( tempDir, 'unzip-multi' );
 		mkdirSync( path.join( unzipDir, 'a' ), { recursive: true } );
 		mkdirSync( path.join( unzipDir, 'b' ), { recursive: true } );
+
+		expect( () => resolvePluginRoot( unzipDir ) ).toThrow( /exactly one/ );
+	} );
+
+	it( 'fails when no top-level directory exists', () => {
+		const unzipDir = path.join( tempDir, 'unzip-empty' );
+		mkdirSync( unzipDir, { recursive: true } );
 
 		expect( () => resolvePluginRoot( unzipDir ) ).toThrow( /exactly one/ );
 	} );
@@ -213,6 +250,64 @@ describe( 'verifyDist', () => {
 		await expect(
 			verifyDist( { zipPath, manifestPath, tmpDir: tempDir } )
 		).rejects.toThrow( /Unexpected files/ );
+	} );
+
+	it( 'fails when manifest entries are unsatisfied', async () => {
+		runCommand.mockImplementation( async ( command, args ) => {
+			if ( command !== 'unzip' ) {
+				return { code: 0, stdout: '', stderr: '' };
+			}
+
+			const workDir = args[ 3 ];
+			const pluginDir = path.join( workDir, 'plugin' );
+			mkdirSync( pluginDir, { recursive: true } );
+			writeFileSync( path.join( pluginDir, 'plugin.php' ), 'php' );
+			return { code: 0, stdout: '', stderr: '' };
+		} );
+
+		const zipPath = path.join( tempDir, 'plugin.zip' );
+		const manifestPath = path.join( tempDir, 'dist-manifest.json' );
+		writeFileSync( zipPath, 'zip' );
+		writeFileSync(
+			manifestPath,
+			JSON.stringify( { files: [ 'plugin.php', 'readme.txt' ] } )
+		);
+
+		await expect(
+			verifyDist( { zipPath, manifestPath, tmpDir: tempDir } )
+		).rejects.toThrow( /Unsatisfied manifest entries/ );
+	} );
+
+	it( 'reports both unexpected and unsatisfied manifest failures', async () => {
+		runCommand.mockImplementation( async ( command, args ) => {
+			if ( command !== 'unzip' ) {
+				return { code: 0, stdout: '', stderr: '' };
+			}
+
+			const workDir = args[ 3 ];
+			const pluginDir = path.join( workDir, 'plugin' );
+			mkdirSync( path.join( pluginDir, 'tests' ), { recursive: true } );
+			writeFileSync( path.join( pluginDir, 'plugin.php' ), 'php' );
+			writeFileSync(
+				path.join( pluginDir, 'tests', 'bootstrap.php' ),
+				'php'
+			);
+			return { code: 0, stdout: '', stderr: '' };
+		} );
+
+		const zipPath = path.join( tempDir, 'plugin.zip' );
+		const manifestPath = path.join( tempDir, 'dist-manifest.json' );
+		writeFileSync( zipPath, 'zip' );
+		writeFileSync(
+			manifestPath,
+			JSON.stringify( { files: [ 'plugin.php', 'readme.txt' ] } )
+		);
+
+		await expect(
+			verifyDist( { zipPath, manifestPath, tmpDir: tempDir } )
+		).rejects.toThrow(
+			/Unexpected files[\s\S]*Unsatisfied manifest entries/
+		);
 	} );
 
 	it( 'fails when the ZIP file is missing', async () => {

@@ -8,6 +8,10 @@ import {
 describe( 'parseVerifyArgs', () => {
 	const cwd = '/project';
 
+	it( 'defaults cwd to process.cwd()', () => {
+		expect( parseVerifyArgs( [] ).cwd ).toBe( process.cwd() );
+	} );
+
 	it( 'returns defaults', () => {
 		expect( parseVerifyArgs( [], { cwd } ) ).toEqual( {
 			zip: undefined,
