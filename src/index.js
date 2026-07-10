@@ -16,6 +16,7 @@ export {
 	patternIsSatisfied,
 } from './match-manifest.js';
 export {
+	VERIFY_DIST_TMP_PREFIX,
 	compactToManifest,
 	createWorkDir,
 	listZipFiles,

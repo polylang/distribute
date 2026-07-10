@@ -13,6 +13,8 @@ import path from 'node:path';
 import { matchManifest } from './match-manifest.js';
 import { runCommand } from './run-command.js';
 
+export const VERIFY_DIST_TMP_PREFIX = 'verify-dist-';
+
 /**
  * Load and validate a dist-manifest.json file.
  *
@@ -97,7 +99,7 @@ export function resolvePluginRoot( unzipDir ) {
  */
 export function createWorkDir( tmpDir ) {
 	mkdirSync( tmpDir, { recursive: true } );
-	return mkdtempSync( path.join( tmpDir, 'verify-dist-' ) );
+	return mkdtempSync( path.join( tmpDir, VERIFY_DIST_TMP_PREFIX ) );
 }
 
 /**

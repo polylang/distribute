@@ -6,24 +6,63 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { runDistribute } from '../../src/run-distribute.js';
-import { verifyDist } from '../../src/verify-dist.js';
+import { VERIFY_DIST_TMP_PREFIX, verifyDist } from '../../src/verify-dist.js';
 import { runCommand } from '../../src/run-command.js';
 
 const __dirname = path.dirname( fileURLToPath( import.meta.url ) );
 const MANIFEST_PATH = path.join( __dirname, 'polylang-dist-manifest.json' );
-const POLYLANG_REPO =
-	process.env.POLYLANG_REPO ?? 'https://github.com/polylang/polylang.git';
+const POLYLANG_REPO = 'https://github.com/polylang/polylang.git';
 
 /**
- * Clone polylang into a temp directory unless a local repo path is provided.
+ * Remove verify-dist work directories from the consumer tmp folder.
  *
- * @return {Promise<string>} Absolute path to the consumer project root.
+ * @param {string} consumerDir Consumer project root.
  */
-async function prepareConsumerRepo() {
-	if ( existsSync( POLYLANG_REPO ) ) {
-		return POLYLANG_REPO;
+function cleanupVerifyDistTmp( consumerDir ) {
+	const tmpDir = path.join( consumerDir, 'tmp' );
+
+	if ( ! existsSync( tmpDir ) ) {
+		return;
 	}
 
+	for ( const entry of readdirSync( tmpDir ) ) {
+		if ( entry.startsWith( VERIFY_DIST_TMP_PREFIX ) ) {
+			rmSync( path.join( tmpDir, entry ), {
+				recursive: true,
+				force: true,
+			} );
+		}
+	}
+}
+
+/**
+ * Remove smoke-test artifacts from a disposable clone.
+ *
+ * @param {string} consumerDir Cloned consumer project root.
+ */
+function cleanupSmokeArtifacts( consumerDir ) {
+	if ( ! consumerDir || ! existsSync( consumerDir ) ) {
+		return;
+	}
+
+	for ( const dirName of [ 'dist', '.distribute-tmp' ] ) {
+		const artifactDir = path.join( consumerDir, dirName );
+
+		if ( existsSync( artifactDir ) ) {
+			rmSync( artifactDir, { recursive: true, force: true } );
+		}
+	}
+
+	cleanupVerifyDistTmp( consumerDir );
+	rmSync( consumerDir, { recursive: true, force: true } );
+}
+
+/**
+ * Clone polylang into a temp directory.
+ *
+ * @return {Promise<string>} Absolute path to the cloned project root.
+ */
+async function cloneConsumerRepo() {
 	const cloneDir = mkdtempSync( path.join( os.tmpdir(), 'polylang-smoke-' ) );
 
 	await runCommand(
@@ -56,22 +95,12 @@ function resolveZipPath( consumerDir ) {
 
 async function main() {
 	let consumerDir;
-	let shouldCleanup = false;
+	let exitCode = 0;
 
 	try {
-		if ( existsSync( POLYLANG_REPO ) ) {
-			consumerDir = POLYLANG_REPO;
-		} else {
-			consumerDir = await prepareConsumerRepo();
-			shouldCleanup = true;
-		}
+		consumerDir = await cloneConsumerRepo();
 
 		console.log( `Running distribute in ${ consumerDir }` );
-
-		const distDir = path.join( consumerDir, 'dist' );
-		if ( existsSync( distDir ) ) {
-			rmSync( distDir, { recursive: true, force: true } );
-		}
 
 		await runDistribute( {
 			cwd: consumerDir,
@@ -98,12 +127,12 @@ async function main() {
 		console.log( 'Polylang smoke test passed.' );
 	} catch ( error ) {
 		console.error( error instanceof Error ? error.message : error );
-		process.exit( 1 );
+		exitCode = 1;
 	} finally {
-		if ( shouldCleanup && consumerDir ) {
-			rmSync( consumerDir, { recursive: true, force: true } );
-		}
+		cleanupSmokeArtifacts( consumerDir );
 	}
+
+	process.exit( exitCode );
 }
 
 main();
