@@ -2,7 +2,7 @@ import { writeFileSync, rmSync, mkdtempSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
-import { detectBuildSteps } from '../src/detect-build-steps.js';
+import { detectBuildSteps } from '../../src/detect-build-steps.js';
 
 describe( 'detectBuildSteps', () => {
 	let tempDir;

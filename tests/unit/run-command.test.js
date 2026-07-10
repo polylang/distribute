@@ -7,7 +7,7 @@ jest.unstable_mockModule( 'node:child_process', () => ( {
 	spawn,
 } ) );
 
-const { runCommand } = await import( '../src/run-command.js' );
+const { runCommand } = await import( '../../src/run-command.js' );
 
 function createMockChild( { stdout = '', stderr = '', code = 0, error } = {} ) {
 	const child = new EventEmitter();

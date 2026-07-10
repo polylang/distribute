@@ -11,12 +11,12 @@ import { jest } from '@jest/globals';
 
 const runCommand = jest.fn();
 
-jest.unstable_mockModule( '../src/run-command.js', () => ( {
+jest.unstable_mockModule( '../../src/run-command.js', () => ( {
 	runCommand,
 } ) );
 
 const { cleanOutputTarget, resolveOutputPath, runDistribute } = await import(
-	'../src/run-distribute.js'
+	'../../src/run-distribute.js'
 );
 
 describe( 'resolveOutputPath', () => {

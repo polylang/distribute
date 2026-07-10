@@ -2,11 +2,11 @@ import { jest } from '@jest/globals';
 
 const runCommand = jest.fn();
 
-jest.unstable_mockModule( '../src/run-command.js', () => ( {
+jest.unstable_mockModule( '../../src/run-command.js', () => ( {
 	runCommand,
 } ) );
 
-const { resolveVersion } = await import( '../src/resolve-version.js' );
+const { resolveVersion } = await import( '../../src/resolve-version.js' );
 
 describe( 'resolveVersion', () => {
 	beforeEach( () => {
