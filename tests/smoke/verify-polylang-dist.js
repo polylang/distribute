@@ -82,7 +82,7 @@ async function main() {
 			mode: 'production',
 			version: 'smoke-test',
 			output: path.join( consumerDir, 'dist' ),
-			tmpDir: path.join( consumerDir, '.distribute-tmp' ),
+			tmpDir: path.join( consumerDir, 'tmp' ),
 			sequential: true,
 		} );
 

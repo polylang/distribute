@@ -5,6 +5,7 @@ export { resolveSlug } from './resolve-slug.js';
 export { detectBuildSteps } from './detect-build-steps.js';
 export { runCommand } from './run-command.js';
 export {
+	DISTRIBUTE_TMP_PREFIX,
 	cleanOutputTarget,
 	resolveOutputPath,
 	runDistribute,

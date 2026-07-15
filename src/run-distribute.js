@@ -3,6 +3,7 @@
 import {
 	existsSync,
 	mkdirSync,
+	mkdtempSync,
 	readdirSync,
 	renameSync,
 	rmSync,
@@ -14,6 +15,19 @@ import { detectBuildSteps } from './detect-build-steps.js';
 import { resolveSlug } from './resolve-slug.js';
 import { resolveVersion } from './resolve-version.js';
 import { runCommand } from './run-command.js';
+
+export const DISTRIBUTE_TMP_PREFIX = 'distribute-';
+
+/**
+ * Create a temp directory for distribute operations.
+ *
+ * @param {string} tmpDir Configured temp parent directory.
+ * @return {string} Absolute path to a unique temp directory.
+ */
+export function createWorkDir( tmpDir ) {
+	mkdirSync( tmpDir, { recursive: true } );
+	return mkdtempSync( path.join( tmpDir, DISTRIBUTE_TMP_PREFIX ) );
+}
 
 /**
  * Resolve the ZIP output path.
@@ -122,10 +136,9 @@ export async function runDistribute( options ) {
 		steps,
 	} );
 
-	const stagingDir = path.join( tmpDir, slug );
-	const tempZipPath = path.join( tmpDir, path.basename( outputPath ) );
-
-	mkdirSync( tmpDir, { recursive: true } );
+	const workDir = createWorkDir( tmpDir );
+	const stagingDir = path.join( workDir, slug );
+	const tempZipPath = path.join( workDir, path.basename( outputPath ) );
 
 	try {
 		mkdirSync( stagingDir, { recursive: true } );
@@ -143,7 +156,9 @@ export async function runDistribute( options ) {
 			{ cwd }
 		);
 
-		await runCommand( 'zip', [ '-r', tempZipPath, slug ], { cwd: tmpDir } );
+		await runCommand( 'zip', [ '-r', tempZipPath, slug ], {
+			cwd: workDir,
+		} );
 
 		cleanOutputTarget( outputPath, output );
 		mkdirSync( path.dirname( outputPath ), { recursive: true } );
@@ -152,11 +167,7 @@ export async function runDistribute( options ) {
 		console.log( `Distribution created at: ${ outputPath }` );
 		return outputPath;
 	} finally {
-		rmSync( stagingDir, { recursive: true, force: true } );
-
-		if ( existsSync( tempZipPath ) ) {
-			unlinkSync( tempZipPath );
-		}
+		rmSync( workDir, { recursive: true, force: true } );
 	}
 }
 

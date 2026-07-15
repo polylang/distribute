@@ -3,6 +3,7 @@ import {
 	existsSync,
 	mkdirSync,
 	mkdtempSync,
+	readdirSync,
 	rmSync,
 	writeFileSync,
 } from 'node:fs';
@@ -148,7 +149,7 @@ describe( 'runDistribute', () => {
 			mode: 'production',
 			version: 'commit',
 			output: path.join( projectDir, 'dist' ),
-			tmpDir: path.join( projectDir, '.distribute-tmp' ),
+			tmpDir: path.join( projectDir, 'tmp' ),
 			sequential: false,
 			npmCmd: undefined,
 			slug: undefined,
@@ -272,7 +273,7 @@ describe( 'runDistribute', () => {
 		);
 	} );
 
-	it( 'packages with slug folder wrapper and custom tmp dir', async () => {
+	it( 'packages with slug folder wrapper and cleans up the work dir', async () => {
 		const customTmp = path.join( projectDir, 'custom-tmp' );
 		const outputPath = path.join(
 			projectDir,
@@ -285,20 +286,55 @@ describe( 'runDistribute', () => {
 			} )
 		);
 
-		expect( runCommand ).toHaveBeenCalledWith(
-			'zip',
-			[
-				'-r',
-				path.join( customTmp, 'polylang-for-elementor-abc1234.zip' ),
-				'polylang-for-elementor',
-			],
-			expect.objectContaining( { cwd: customTmp } )
+		const zipCall = runCommand.mock.calls.find(
+			( call ) => call[ 0 ] === 'zip'
 		);
+		const workDir = zipCall[ 2 ].cwd;
+
+		expect( workDir ).toMatch(
+			new RegExp(
+				`^${ customTmp.replace(
+					/[.*+?^${}()|[\]\\]/g,
+					'\\$&'
+				) }/distribute-`
+			)
+		);
+		expect( zipCall[ 1 ] ).toEqual( [
+			'-r',
+			path.join( workDir, 'polylang-for-elementor-abc1234.zip' ),
+			'polylang-for-elementor',
+		] );
 		expect( existsSync( customTmp ) ).toBe( true );
 		expect(
-			existsSync( path.join( customTmp, 'polylang-for-elementor' ) )
-		).toBe( false );
+			readdirSync( customTmp ).filter( ( entry ) =>
+				entry.startsWith( 'distribute-' )
+			)
+		).toEqual( [] );
 		expect( existsSync( outputPath ) ).toBe( true );
+	} );
+
+	it( 'preserves unrelated files in the temp parent directory', async () => {
+		const customTmp = path.join( projectDir, 'custom-tmp' );
+		mkdirSync( path.join( customTmp, 'plugins' ), { recursive: true } );
+		writeFileSync(
+			path.join( customTmp, 'plugins', 'keep-me.txt' ),
+			'keep'
+		);
+
+		await runDistribute(
+			baseOptions( {
+				tmpDir: customTmp,
+			} )
+		);
+
+		expect(
+			existsSync( path.join( customTmp, 'plugins', 'keep-me.txt' ) )
+		).toBe( true );
+		expect(
+			readdirSync( customTmp ).filter( ( entry ) =>
+				entry.startsWith( 'distribute-' )
+			)
+		).toEqual( [] );
 	} );
 
 	it( 'uses npm install when package-lock.json is missing', async () => {
@@ -373,13 +409,9 @@ describe( 'runDistribute', () => {
 		expect( existsSync( outputPath ) ).toBe( true );
 	} );
 
-	it( 'cleans up the temp zip when packaging fails after zip', async () => {
+	it( 'cleans up the work dir when packaging fails after zip', async () => {
 		const customTmp = path.join( projectDir, 'custom-tmp' );
 		const outputDir = path.join( projectDir, 'dist' );
-		const tempZipPath = path.join(
-			customTmp,
-			'polylang-for-elementor-abc1234.zip'
-		);
 		mkdirSync( outputDir, { recursive: true } );
 		chmodSync( outputDir, 0o555 );
 
@@ -396,7 +428,11 @@ describe( 'runDistribute', () => {
 			chmodSync( outputDir, 0o755 );
 		}
 
-		expect( existsSync( tempZipPath ) ).toBe( false );
+		expect(
+			readdirSync( customTmp ).filter( ( entry ) =>
+				entry.startsWith( 'distribute-' )
+			)
+		).toEqual( [] );
 	} );
 
 	it( 'aborts sibling build step on failure', async () => {

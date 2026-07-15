@@ -15,7 +15,7 @@ describe( 'parseArgs', () => {
 			version: 'commit',
 			output: path.join( cwd, 'dist' ),
 			slug: undefined,
-			tmpDir: path.join( cwd, '.distribute-tmp' ),
+			tmpDir: path.join( cwd, 'tmp' ),
 			sequential: false,
 			npmCmd: undefined,
 			cwd,
@@ -92,9 +92,7 @@ describe( 'parseArgs', () => {
 
 		expect( options.cwd ).toBe( path.join( cwd, 'other' ) );
 		expect( options.output ).toBe( path.join( cwd, 'other', 'dist' ) );
-		expect( options.tmpDir ).toBe(
-			path.join( cwd, 'other', '.distribute-tmp' )
-		);
+		expect( options.tmpDir ).toBe( path.join( cwd, 'other', 'tmp' ) );
 	} );
 
 	it( 'throws when a value flag is missing its value', () => {
