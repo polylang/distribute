@@ -1,6 +1,6 @@
 node_modules/
 coverage/
 dist/
-.distribute-tmp/
+tmp/
 *.log
 .DS_Store

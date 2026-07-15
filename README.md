@@ -30,7 +30,7 @@ npx distribute [options]
 --version <strategy|text>   Default: commit (strategies: commit, tag, or a literal version)
 --output <path>             Output directory or ZIP file (default: {cwd}/dist)
 --slug <name>               Override slug (default: from package.json name)
---tmp-dir <path>            Temp working directory (default: {cwd}/.distribute-tmp)
+--tmp-dir <path>            Temp parent directory (default: {cwd}/tmp)
 --sequential                Run composer then npm (default: parallel when both apply)
 --npm-cmd <script>          Override npm script (default: build or build:dev per mode)
 --cwd <path>                Project root (default: process.cwd())
