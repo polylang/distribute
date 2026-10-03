@@ -48,6 +48,6 @@
 	},
 	"devDependencies": {
 		"@jest/globals": "^30.2.0",
-		"@wordpress/scripts": "^34.0.0"
+		"@wordpress/scripts": "^36.0.0"
 	}
 }
